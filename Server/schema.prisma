@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  phone     String?   @default("")
+  avatar    String?   @default("")
+  isAdmin   Boolean   @default(false)
+  addresses Address[]
+  orders    Order[]
+  reviews   Review[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Address {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label     String
+  address   String
+  city      String
+  state     String
+  zip       String
+  phone     String?  @default("")
+  isDefault Boolean  @default(false)
+  lat       Float
+  lng       Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id            String   @id @default(uuid())
+  name          String
+  description   String?  @default("")
+  price         Float
+  originalPrice Float?   @default(0)
+  image         String
+  category      String
+  unit          String?  @default("piece")
+  stock         Int?     @default(0)
+  minQty        Int?     @default(0)
+  isOrganic     Boolean? @default(false)
+  rating        Float?   @default(0)
+  reviewCount   Int?     @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Order {
+  id              String @id @default(uuid())
+  userId          String
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items           Json
+  shippingAddress Json
+  paymentMethod   String @default("card")
+  subtotal        Float
+  deliveryFee     Float? @default(0)
+  tax             Float? @default(0)
+  total           Float
+  status          String @default("Placed")
+  statusHistory   Json
+  couponCode      String?
+  discountAmount  Float?  @default(0)
+
+  deliveryPartnerId String?
+  deliveryPartner   DeliveryPartner? @relation(fields: [deliveryPartnerId], references: [id], onDelete: SetNull)
+  deliveryOtp       String?          @default("")
+  liveLocation      Json?
+  locationHistory   Json?
+  isPaid            Boolean?         @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveryPartner {
+  id          String   @id @default(uuid())
+  name        String
+  email       String   @unique
+  password    String
+  phone       String
+  avatar      String?  @default("")
+  vehicleType String?  @default("bike")
+  isActive    Boolean? @default(true)
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Setting {
+  id    String @id @default(uuid())
+  key   String @unique
+  value Json
+}
+
+model Pincode {
+  id          String  @id @default(uuid())
+  pincode     String
+  deliveryFee Float   @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  image     String?  @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Offer {
+  id            String   @id @default(uuid())
+  title         String
+  description   String?
+  discountType  String   // percent | flat | free_item
+  discountValue Float
+  freeItem      String?
+  minPurchase   Float?   @default(0)
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Coupon {
+  id             String   @id @default(uuid())
+  code           String   @unique
+  description    String?
+  discountPercent Int?    @default(0)
+  discountFlat   Float?   @default(0)
+  minPurchase    Float?   @default(0)
+  maxUses        Int?     @default(0)
+  usedCount      Int?     @default(0)
+  expiresAt      DateTime?
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model Review {
+  id        String   @id @default(uuid())
+  productId String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comment   String
+  rating    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId, userId])
+}
