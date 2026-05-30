@@ -10,11 +10,10 @@ import { Tag } from 'lucide-react'
 
 declare global {
   interface Window {
-    Cashfree: {
+    Cashfree: (opts: { mode: 'sandbox' | 'production' }) => {
       checkout: (opts: {
         paymentSessionId: string
         redirectTarget: '_self' | '_blank' | '_modal'
-        mode: 'sandbox' | 'production'
       }) => Promise<{ redirect?: boolean; error?: unknown }>
     }
   }
@@ -152,13 +151,14 @@ const Checkout = () => {
         if (data.success && data.paymentSessionId) {
           clearCart()
           try {
-            window.Cashfree.checkout({
+            const cashfree = window.Cashfree({ mode: data.cashfreeMode || 'production' })
+            cashfree.checkout({
               paymentSessionId: data.paymentSessionId,
               redirectTarget: '_self',
-              mode: data.cashfreeMode || 'production',
             })
-          } catch {
-            window.location.href = `https://pay.cashfree.com/checkout/${data.paymentSessionId}`
+          } catch (cfErr) {
+            console.error('Cashfree checkout error:', cfErr)
+            toast.error('Payment gateway failed to load. Please try again.')
           }
         }
       }
