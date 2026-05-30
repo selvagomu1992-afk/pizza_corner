@@ -121,9 +121,9 @@ const ProductDetail = () => {
                 </button>
               ))}
             </div>
-            {product.rating > 0 && (
+            {(product.rating ?? 0) > 0 && (
               <span className="text-sm text-stone-500">
-                {product.rating} ({product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'})
+                {product.rating} ({product.reviewCount ?? 0} {product.reviewCount === 1 ? 'review' : 'reviews'})
               </span>
             )}
           </div>

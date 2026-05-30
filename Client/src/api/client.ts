@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE = import.meta.env.VITE_API_URL || '/api'
+const API_BASE = import.meta.env.VITE_API_URL || 'https://pizza-corner-server.vercel.app/api'
 
 const api = axios.create({
   baseURL: API_BASE,
