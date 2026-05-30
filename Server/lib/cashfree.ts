@@ -9,11 +9,16 @@ let client: Cashfree | null = null
 
 export const getCashfreeClient = (): Cashfree => {
     if (!client) {
+        const appId = process.env.CASHFREE_APP_ID
+        const secretKey = process.env.CASHFREE_SECRET_KEY
+        if (!appId || !secretKey) {
+            throw new Error('CASHFREE_APP_ID and CASHFREE_SECRET_KEY must be set in environment variables')
+        }
         const mode = getCashfreeMode()
         client = new Cashfree(
             mode === 'sandbox' ? CFEnvironment.SANDBOX : CFEnvironment.PRODUCTION,
-            process.env.CASHFREE_APP_ID!,
-            process.env.CASHFREE_SECRET_KEY!
+            appId,
+            secretKey
         )
     }
     return client

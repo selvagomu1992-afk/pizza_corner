@@ -243,7 +243,8 @@ export const createPaymentOrder = async (req: Request, res: Response) => {
         })
     } catch (error) {
         console.error('Create payment order error:', error)
-        res.status(500).json({ success: false, message: 'Payment order creation failed' })
+        const msg = error instanceof Error ? error.message : 'Payment order creation failed'
+        res.status(500).json({ success: false, message: msg })
     }
 }
 
