@@ -10,7 +10,13 @@ import { Tag } from 'lucide-react'
 
 declare global {
   interface Window {
-    Cashfree: new (sessionId: string) => { redirect: (options?: { notifyUrl?: string }) => void }
+    Cashfree: {
+      checkout: (opts: {
+        paymentSessionId: string
+        redirectTarget: '_self' | '_blank' | '_modal'
+        mode: 'sandbox' | 'production'
+      }) => Promise<{ redirect?: boolean; error?: unknown }>
+    }
   }
 }
 
@@ -146,8 +152,11 @@ const Checkout = () => {
         if (data.success && data.paymentSessionId) {
           clearCart()
           try {
-            const cashfree = new window.Cashfree(data.paymentSessionId)
-            cashfree.redirect()
+            window.Cashfree.checkout({
+              paymentSessionId: data.paymentSessionId,
+              redirectTarget: '_self',
+              mode: data.cashfreeMode || 'production',
+            })
           } catch {
             window.location.href = `https://pay.cashfree.com/checkout/${data.paymentSessionId}`
           }
