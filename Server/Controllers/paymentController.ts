@@ -7,7 +7,14 @@ import { resolveAdminUserId } from '../lib/ensureAdminUser.js'
 import { getCashfreeClient, getCashfreeMode, extractPaymentSessionId } from '../lib/cashfree.js'
 import { sendOrderConfirmationEmail } from '../Config/emailService.js'
 
-const cashfree = getCashfreeClient()
+/** Lazy getter — initializes on first use inside handler so missing env vars are caught by try/catch */
+const getCashfree = (): ReturnType<typeof getCashfreeClient> => {
+    const _cached = (getCashfree as any).__instance as ReturnType<typeof getCashfreeClient> | undefined
+    if (_cached) return _cached
+    const instance = getCashfreeClient()
+    ;(getCashfree as any).__instance = instance
+    return instance
+}
 
 const TAX_RATE             = 0.05  // 5% GST
 const FREE_DELIVERY_THRESHOLD = 20
@@ -187,7 +194,7 @@ export const createPaymentOrder = async (req: Request, res: Response) => {
         // For online payment — create Cashfree order
         const cfOrderId = `order_${Date.now()}_${userId.slice(-6)}`
 
-        const cfOrder = await cashfree.PGCreateOrder({
+        const cfOrder = await getCashfree().PGCreateOrder({
             order_id:       cfOrderId,
             order_amount:   total,
             order_currency: 'INR',
@@ -260,7 +267,7 @@ export const verifyPayment = async (req: Request, res: Response) => {
         }
 
         // Fetch payment status from Cashfree
-        const cfResponse = await cashfree.PGFetchOrder(cfOrderId)
+        const cfResponse = await getCashfree().PGFetchOrder(cfOrderId)
         const cfData     = cfResponse.data
 
         const isPaid = cfData?.order_status === 'PAID'
@@ -550,7 +557,7 @@ export const createCounterOrder = async (req: AuthRequest, res: Response) => {
 
         let cfOrder
         try {
-            cfOrder = await cashfree.PGCreateOrder(cfPayload as any)
+            cfOrder = await getCashfree().PGCreateOrder(cfPayload as any)
         } catch (cfError) {
             console.error('Cashfree counter PGCreateOrder error:', (cfError as any)?.response?.data || cfError)
             res.status(502).json({ success: false, message: cashfreeErrorMessage(cfError) })
@@ -610,7 +617,7 @@ export const getPaymentStatus = async (req: Request, res: Response) => {
     try {
         const cfOrderId = String(req.params.cfOrderId)
 
-        const cfResponse = await cashfree.PGFetchOrder(cfOrderId)
+        const cfResponse = await getCashfree().PGFetchOrder(cfOrderId)
 
         res.status(200).json({
             success: true,
@@ -640,7 +647,7 @@ export const verifyRedirect = async (req: Request, res: Response) => {
         }
 
         // Fetch payment status from Cashfree
-        const cfResponse = await cashfree.PGFetchOrder(cfOrderId)
+        const cfResponse = await getCashfree().PGFetchOrder(cfOrderId)
         const cfData = cfResponse.data
         const isPaid = cfData?.order_status === 'PAID'
 
