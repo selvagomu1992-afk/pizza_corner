@@ -64,6 +64,19 @@ const SAMPLE_SLIDES = [
   { image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=1200', title: 'Chilled Beverages', subtitle: 'Pair your meal with refreshing drinks. Free delivery on orders above ₹299.', ctaText: 'Order Now', ctaLink: '/products?category=Beverages', order: 4, type: 'image' as const },
 ]
 
+const defaultCategories: CategoryCard[] = [
+  { id: 'pizza', name: 'Pizza', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=400' },
+  { id: 'burger', name: 'Burger', image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400' },
+  { id: 'pasta', name: 'Pasta', image: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=400' },
+  { id: 'sandwich', name: 'Sandwich', image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?w=400' },
+  { id: 'fries', name: 'Fries', image: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=400' },
+  { id: 'beverages', name: 'Beverages', image: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=400' },
+  { id: 'salad', name: 'Salad', image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400' },
+  { id: 'desserts', name: 'Desserts', image: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=400' },
+  { id: 'biryani', name: 'Biryani', image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=400' },
+  { id: 'momos', name: 'Momos', image: 'https://images.unsplash.com/photo-1625220194771-7ebdea0b70b9?w=400' },
+]
+
 const Home = () => {
   const [settings, setSettings] = useState<Settings | null>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -154,35 +167,72 @@ const Home = () => {
         </section>
       )}
 
-      {/* ─── Category Cards ──────────────────────────────── */}
-      {displayCats.length > 0 && (
-        <section className="py-16 max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-stone-800 mb-8 text-center">Our Menu</h2>
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-4">
-            {displayCats.map((cat) => (
-              <Link key={cat.id} to={`/products?category=${encodeURIComponent(cat.name)}`}
-                className="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden group flex flex-col">
-                <div className="h-36 bg-stone-100 flex items-center justify-center overflow-hidden">
-                  {cat.image && !brokenImages.has(cat.id) ? (
-                    <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                      onError={() => markBroken(cat.id)} />
-                  ) : (
-                    <span className="text-stone-300 text-4xl font-bold">{cat.name[0]}</span>
-                  )}
+      {/* ─── Rotating Food Images ──────────────────────────────── */}
+      <section className="py-12 overflow-hidden bg-gradient-to-b from-amber-50/50 to-transparent">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-2xl md:text-3xl font-bold text-stone-800 mb-8 text-center">Our Specialties</h2>
+          <div className="flex justify-center items-center gap-6 md:gap-12 flex-wrap">
+            {[
+              { img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=300', label: 'Pizza', link: '/products?category=Pizza' },
+              { img: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=300', label: 'Burger', link: '/products?category=Burger' },
+              { img: 'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=300', label: 'Pasta', link: '/products?category=Pasta' },
+              { img: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300', label: 'Fries', link: '/products?category=Fries' },
+              { img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300', label: 'Beverages', link: '/products?category=Beverages' },
+              { img: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=300', label: 'Salad', link: '/products?category=Salad' },
+              { img: 'https://images.unsplash.com/photo-1587314168485-3236d6710814?w=300', label: 'Sandwich', link: '/products?category=Sandwich' },
+              { img: 'https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=300', label: 'Desserts', link: '/products?category=Desserts' },
+            ].map((item, i) => (
+              <Link to={item.link} key={i} className="flex flex-col items-center gap-2 group">
+                <div
+                  className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-amber-200 shadow-lg group-hover:border-amber-500 group-hover:shadow-xl transition-all duration-300"
+                  style={{ animation: `spin 8s linear infinite`, animationDelay: `${i * -1}s` }}
+                >
+                  <img src={item.img} alt={item.label} className="w-full h-full object-cover" style={{ animation: `counter-spin 8s linear infinite`, animationDelay: `${i * -1}s` }} />
                 </div>
-                <div className="p-3 text-center flex items-center justify-center flex-1">
-                  <h3 className="font-bold text-stone-800 text-sm leading-tight">{cat.name}</h3>
-                </div>
+                <span className="text-sm font-semibold text-stone-700 group-hover:text-amber-600 transition-colors">{item.label}</span>
               </Link>
             ))}
           </div>
-          <div className="text-center mt-10">
-            <Link to="/products" className="text-amber-600 font-medium hover:text-amber-700">
-              View Full Menu &rarr;
+        </div>
+        <style>{`
+          @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+          }
+          @keyframes counter-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+          }
+        `}</style>
+      </section>
+
+      {/* ─── Category Cards ──────────────────────────────── */}
+      <section className="py-16 max-w-7xl mx-auto px-4">
+        <h2 className="text-3xl font-bold text-stone-800 mb-8 text-center">Our Menu</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+          {(displayCats.length > 0 ? displayCats : defaultCategories).map((cat) => (
+            <Link key={cat.id} to={`/products?category=${encodeURIComponent(cat.name)}`}
+              className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group flex flex-col">
+              <div className="h-40 bg-stone-100 flex items-center justify-center overflow-hidden">
+                {cat.image && !brokenImages.has(cat.id) ? (
+                  <img src={cat.image} alt={cat.name} className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
+                    onError={() => markBroken(cat.id)} />
+                ) : (
+                  <span className="text-stone-300 text-4xl font-bold">{cat.name[0]}</span>
+                )}
+              </div>
+              <div className="p-3 text-center flex items-center justify-center flex-1">
+                <h3 className="font-bold text-stone-800 text-sm leading-tight group-hover:text-amber-600 transition-colors">{cat.name}</h3>
+              </div>
             </Link>
-          </div>
-        </section>
-      )}
+          ))}
+        </div>
+        <div className="text-center mt-10">
+          <Link to="/products" className="inline-block bg-amber-600 text-white px-6 py-2.5 rounded-full font-semibold hover:bg-amber-700 transition shadow-md">
+            View Full Menu &rarr;
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }
